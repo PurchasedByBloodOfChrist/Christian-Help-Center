@@ -7,58 +7,80 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
+            background-color: #f4f6f0; /* Soft warm cream */
             color: #2c3e50;
             margin: 0;
             padding: 20px;
         }
         header {
             text-align: center;
-            padding: 30px 20px;
-            background-color: #34495e;
+            padding: 60px 20px;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('Banner.png');
+            background-size: cover;
+            background-position: center;
             color: white;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
         }
         h1 {
             margin: 0;
-            font-size: 2.5em;
-        }
-        header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-            font-size: 1.1em;
+            font-size: 2.6em;
+            letter-spacing: 0.5px;
         }
         .container {
             max-width: 700px;
             margin: 30px auto;
             background: white;
-            padding: 25px;
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+        .rules-box {
+            background-color: #fcfdfa;
+            border-left: 4px solid #6b8e23;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+        .rules-box h3 {
+            margin-top: 0;
+            color: #4a5d4e;
+            font-size: 1.2em;
+        }
+        .rules-box ol {
+            margin: 0;
+            padding-left: 20px;
+            line-height: 1.6;
+            color: #4f5f51;
         }
         h2 {
-            border-bottom: 2px solid #ecf0f1;
+            border-bottom: 2px solid #f0f4f0;
             padding-bottom: 10px;
             margin-top: 0;
-            color: #2c3e50;
+            color: #34495e;
         }
         textarea {
             width: 100%;
             border-radius: 8px;
-            border: 1px solid #ccc;
-            padding: 12px;
+            border: 1px solid #ced4da;
+            padding: 15px;
             box-sizing: border-box;
             font-size: 1em;
             font-family: inherit;
             resize: none;
+            background-color: #fafbfc;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4a5d4e;
+            background-color: #fff;
         }
         button {
-            margin-top: 10px;
-            background-color: #3498db;
+            margin-top: 12px;
+            background-color: #5c7a62; /* Muted Green Button */
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 26px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -66,26 +88,22 @@
             transition: background 0.2s;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #4a5d4e;
         }
         .post {
-            background-color: #fdfefe;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background-color: #ffffff;
+            border-left: 4px solid #8fa89b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             position: relative;
         }
-        .example-post {
-            border-left: 4px solid #7f8c8d;
-            background-color: #f8f9fa;
-        }
         .pinned-post {
-            border-left: 4px solid #f1c40f !important;
-            background-color: #fffdf3;
+            border-left: 4px solid #d4af37 !important; /* Muted gold for pinned posts */
+            background-color: #fffdf6;
         }
-        .anonymous-tag, .example-tag {
+        .anonymous-tag {
             color: #7f8c8d;
             font-size: 0.85em;
             font-weight: bold;
@@ -93,69 +111,54 @@
             letter-spacing: 0.5px;
         }
         .post p {
-            margin: 8px 0 0 0;
-            line-height: 1.5;
-            color: #34495e;
+            margin: 10px 0 0 0;
+            line-height: 1.6;
+            color: #2c3e50;
+            font-size: 1.05em;
         }
-        .admin-controls {
-            display: none;
-            margin-top: 10px;
-            gap: 10px;
-        }
-        .user-controls {
-            margin-top: 10px;
+        .admin-controls, .user-controls {
+            margin-top: 15px;
             display: flex;
             gap: 10px;
         }
+        .admin-controls { display: none; }
         .admin-btn {
-            padding: 4px 10px;
+            padding: 5px 12px;
             font-size: 0.8em;
             border-radius: 4px;
             font-weight: normal;
             margin-top: 0;
         }
-        .pin-btn { background-color: #f1c40f; color: #333; }
-        .ban-btn { background-color: #e74c3c; color: white; }
-        .del-btn { background-color: #e67e22; color: white; border: none; padding: 4px 10px; font-size: 0.8em; border-radius: 4px; cursor: pointer;}
-        .del-btn:hover { background-color: #d35400; }
+        .pin-btn { background-color: #e6c229; color: #333; }
+        .ban-btn { background-color: #c0392b; color: white; }
+        .del-btn { background-color: #d35400; color: white; border: none; padding: 5px 12px; font-size: 0.8em; border-radius: 4px; cursor: pointer;}
+        .del-btn:hover { background-color: #ba4a00; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Christian Help Center</h1>
-        <p>A safe, anonymous space to reach out for support, guidance, and prayer.</p>
     </header>
 
     <div class="container">
+        <div class="rules-box">
+            <h3>📌 Helpline Guidelines</h3>
+            <ol>
+                <li><strong>Keep it Faith-Focused:</strong> Posts sharing life struggles, battles with sin, prayer requests, or support through stress and mental health are fully welcome.</li>
+                <li><strong>Built to Uplift:</strong> This is a helpline. Do not post content meant to judge, argue with, or cause extra stress to other members.</li>
+                <li><strong>Zero Tolerance:</strong> Inappropriate or malicious text results in an immediate, permanent device ban.</li>
+            </ol>
+        </div>
+
         <h2>Submit a Help Request</h2>
-        <textarea id="postInput" placeholder="Type your anonymous request here..." rows="4"></textarea>
+        <textarea id="postInput" placeholder="Type your anonymous request or prayer here..." rows="4"></textarea>
         <button onclick="submitPost()">Post Anonymously</button>
     </div>
 
     <div class="container">
-        <h2>Community Board <span id="adminBadge" style="display:none; color:#e74c3c; font-size:0.5em; vertical-align:middle; border:1px solid #e74c3c; padding:2px 6px; border-radius:4px; margin-left:10px;">ADMIN MODE</span></h2>
-        <div id="boardPosts">
-            
-            <div class="post example-post" id="ex1">
-                <span class="example-tag">📌 [EXAMPLE POST] Welcome & Rules</span>
-                <p>Welcome to the Christian Help Center. This is an anonymous board where you can share life challenges, ask for guidance, or request prayers. Please keep all conversations supportive, encouraging, and respectful.</p>
-                <div class="admin-controls">
-                    <button class="admin-btn pin-btn" onclick="pinPost('ex1')">Pin 📌</button>
-                    <button class="admin-btn ban-btn" onclick="banUser('System', 'ex1')">Remove ❌</button>
-                </div>
-            </div>
-
-            <div class="post example-post" id="ex2">
-                <span class="example-tag">📌 [EXAMPLE POST] Keeping it Safe</span>
-                <p>Your privacy is protected—no usernames or real names are displayed here. Harassment, inappropriate content, or malicious text will result in a permanent ban by the administrator.</p>
-                <div class="admin-controls">
-                    <button class="admin-btn pin-btn" onclick="pinPost('ex2')">Pin 📌</button>
-                    <button class="admin-btn ban-btn" onclick="banUser('System', 'ex2')">Remove ❌</button>
-                </div>
-            </div>
-
-        </div>
+        <h2>Community Board <span id="adminBadge" style="display:none; color:#c0392b; font-size:0.5em; vertical-align:middle; border:1px solid #c0392b; padding:2px 6px; border-radius:4px; margin-left:10px;">ADMIN MODE</span></h2>
+        <div id="boardPosts"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -175,7 +178,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Check if this browser already has a saved User Token from this week
         let currentSessionUser = localStorage.getItem('help_center_user_token');
         if (!currentSessionUser) {
             currentSessionUser = "User_" + Math.floor(1000 + Math.random() * 9000);
@@ -185,20 +187,14 @@
         let isAdmin = false;
         let activeBlacklist = [];
 
-        // Continuous sync loop listening to the cloud Blacklist directory
         database.ref('blacklist').on('value', (snapshot) => {
             activeBlacklist = [];
             const data = snapshot.val();
-            if (data) {
-                activeBlacklist = Object.values(data);
-            }
+            if (data) activeBlacklist = Object.values(data);
         });
 
-        // Continuous sync loop loading board posts
         database.ref('posts').on('value', (snapshot) => {
             const board = document.getElementById("boardPosts");
-            const ex1 = document.getElementById("ex1");
-            const ex2 = document.getElementById("ex2");
             board.innerHTML = "";
             
             const data = snapshot.val();
@@ -231,10 +227,9 @@
                     `;
                     board.insertAdjacentHTML('beforeend', newPostHTML);
                 });
+            } else {
+                board.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-style:italic; margin: 20px 0;">The board is currently quiet. Be the first to share a prayer request or support need.</p>`;
             }
-            
-            if (ex1) board.appendChild(ex1);
-            if (ex2) board.appendChild(ex2);
         });
 
         function submitPost() {
@@ -243,17 +238,13 @@
             
             if (postText === "") return;
 
-            // Admin password verification
             if (postText.startsWith("/admin ")) {
                 const typedPassword = postText.substring(7).trim();
-                
                 if (btoa(typedPassword) === "RmFpdGg3Nzc=") { 
                     isAdmin = true;
                     document.getElementById("adminBadge").style.display = "inline-block";
-                    
                     document.querySelectorAll('.admin-controls').forEach(c => c.style.display = 'flex');
                     document.querySelectorAll('.user-controls').forEach(c => c.style.display = 'flex');
-                    
                     alert("Access Granted: Admin Dashboard Loaded.");
                     inputField.value = "";
                     return;
@@ -264,9 +255,8 @@
                 }
             }
 
-            // Real-time Cloud Blacklist check
             if (activeBlacklist.includes(currentSessionUser)) {
-                alert("Access Denied: Your browser device token has been permanently banned from posting by the administrator.");
+                alert("Access Denied: Your device token has been permanently banned from posting.");
                 inputField.value = "";
                 return;
             }
@@ -299,25 +289,19 @@
 
         function banUser(userTag, id) {
             if (userTag === 'System') return;
-            
-            if (confirm(`☢️ NUCLEAR OPTION: Permanently ban ${userTag} and vaporize ALL of their posts from the board?`)) {
-                // 1. Send their token to the cloud blacklist forever
+            if (confirm(`☢️ NUCLEAR OPTION: Permanently ban ${userTag} and vaporize ALL of their posts?`)) {
                 database.ref('blacklist').push(userTag);
-                
-                // 2. Scan the entire database and delete every single post belonging to them
                 database.ref('posts').once('value').then((snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         Object.entries(data).forEach(([postId, postDetails]) => {
                             if (postDetails.user === userTag) {
-                                // Delete this specific matching post from the cloud
                                 database.ref('posts/' + postId).remove();
                             }
                         });
                     }
                 });
-                
-                alert(`💥 Amputation complete. ${userTag} is blacklisted and their entire post history has been wiped.`);
+                alert(`💥 ${userTag} is blacklisted and their history has been wiped.`);
             }
         }
 
@@ -327,6 +311,5 @@
             );
         }
     </script>
-
 </body>
 </html>
