@@ -173,21 +173,9 @@
         let blacklist = ["User_4421", "User_9902"];
         let isAdmin = false;
 
-        // The secure scrambled target hash for the admin password
-        const ADMIN_HASH_TARGET = "47690a4df7538ec9d5830eb8a614cf1353f06059d047321689255653c0704944";
-
-        // Secret automatic string hasher
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);                    
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
         // Automatically fetch and load posts from Firebase whenever the data updates
         database.ref('posts').on('value', (snapshot) => {
             const board = document.getElementById("boardPosts");
-            
             const ex1 = document.getElementById("ex1");
             const ex2 = document.getElementById("ex2");
             board.innerHTML = "";
@@ -221,25 +209,29 @@
             if (ex2) board.appendChild(ex2);
         });
 
-        async function submitPost() {
+        function submitPost() {
             const inputField = document.getElementById("postInput");
             const postText = inputField.value.trim();
             
             if (postText === "") return;
 
-            // Admin activation trigger checking the scrambled format
+            // Simple direct command check
             if (postText.startsWith("/admin ")) {
                 const typedPassword = postText.substring(7).trim();
-                const calculatedHash = await sha256(typedPassword);
-
-                if (calculatedHash === ADMIN_HASH_TARGET) {
+                
+                // Checks an obfuscated string so simple DevTools searches fail
+                if (btoa(typedPassword) === "RmFpdGg3Nzc=") { 
                     isAdmin = true;
                     document.getElementById("adminBadge").style.display = "inline-block";
                     
                     const controls = document.querySelectorAll('.admin-controls');
                     controls.forEach(control => control.style.display = 'flex');
                     
-                    alert("Access Granted: Admin Dashboard Loaded Securely.");
+                    alert("Access Granted: Admin Dashboard Loaded.");
+                    inputField.value = "";
+                    return;
+                } else {
+                    alert("Incorrect Admin Password.");
                     inputField.value = "";
                     return;
                 }
@@ -253,7 +245,7 @@
                 lowerText.includes('admn') || 
                 lowerText.includes('addmin')
             )) {
-                alert("⚠️ Safety Block: Accidental admin command or password typo detected. Post blocked for protection.");
+                alert("⚠️ Safety Block: Accidental admin command or password typo detected.");
                 inputField.value = "";
                 return;
             }
