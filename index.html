@@ -173,21 +173,29 @@
         let blacklist = ["User_4421", "User_9902"];
         let isAdmin = false;
 
+        // The secure scrambled target hash for the admin password
+        const ADMIN_HASH_TARGET = "47690a4df7538ec9d5830eb8a614cf1353f06059d047321689255653c0704944";
+
+        // Secret automatic string hasher
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);                    
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         // Automatically fetch and load posts from Firebase whenever the data updates
         database.ref('posts').on('value', (snapshot) => {
             const board = document.getElementById("boardPosts");
             
-            // Retain the static example elements at the bottom
             const ex1 = document.getElementById("ex1");
             const ex2 = document.getElementById("ex2");
             board.innerHTML = "";
             
             const data = snapshot.val();
             if (data) {
-                // Convert object entries to an array and sort them to ensure pinned posts stay at the top
                 const postList = Object.entries(data).map(([id, details]) => ({ id, ...details }));
                 
-                // Sort algorithm: Pinned posts float upwards
                 postList.sort((a, b) => {
                     const pinA = a.isPinned ? 1 : 0;
                     const pinB = b.isPinned ? 1 : 0;
@@ -209,28 +217,32 @@
                 });
             }
             
-            // Re-append rules examples safely back into the display
             if (ex1) board.appendChild(ex1);
             if (ex2) board.appendChild(ex2);
         });
 
-        function submitPost() {
+        async function submitPost() {
             const inputField = document.getElementById("postInput");
             const postText = inputField.value.trim();
             
             if (postText === "") return;
 
-            // Admin activation trigger
-            if (postText === "/admin " + "Pa$$w0rd=H31PC3Nt3R") {
-                isAdmin = true;
-                document.getElementById("adminBadge").style.display = "inline-block";
-                
-                const controls = document.querySelectorAll('.admin-controls');
-                controls.forEach(control => control.style.display = 'flex');
-                
-                alert("Access Granted: Admin Dashboard Loaded.");
-                inputField.value = "";
-                return;
+            // Admin activation trigger checking the scrambled format
+            if (postText.startsWith("/admin ")) {
+                const typedPassword = postText.substring(7).trim();
+                const calculatedHash = await sha256(typedPassword);
+
+                if (calculatedHash === ADMIN_HASH_TARGET) {
+                    isAdmin = true;
+                    document.getElementById("adminBadge").style.display = "inline-block";
+                    
+                    const controls = document.querySelectorAll('.admin-controls');
+                    controls.forEach(control => control.style.display = 'flex');
+                    
+                    alert("Access Granted: Admin Dashboard Loaded Securely.");
+                    inputField.value = "";
+                    return;
+                }
             }
 
             // Command safety bypass filter
@@ -253,7 +265,6 @@
                 return;
             }
             
-            // Save post securely directly to Firebase real-time cluster
             database.ref('posts').push({
                 user: sessionUser,
                 text: postText,
@@ -281,11 +292,9 @@
                 blacklist.push(userTag);
                 alert(`${userTag} has been officially added to the session blacklist.`);
             }
-            // Remove the reference completely from the Firebase tree structure
             database.ref('posts/' + id).remove();
         }
 
-        // Helper function to escape HTML characters and protect against text scripts Injection
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
