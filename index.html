@@ -300,14 +300,24 @@
         function banUser(userTag, id) {
             if (userTag === 'System') return;
             
-            if (confirm(`Permanently ban ${userTag} and drop all their posts?`)) {
-                // 1. Commit the user token straight to the cloud blacklist branch
+            if (confirm(`☢️ NUCLEAR OPTION: Permanently ban ${userTag} and vaporize ALL of their posts from the board?`)) {
+                // 1. Send their token to the cloud blacklist forever
                 database.ref('blacklist').push(userTag);
                 
-                // 2. Erase the offending post
-                database.ref('posts/' + id).remove();
+                // 2. Scan the entire database and delete every single post belonging to them
+                database.ref('posts').once('value').then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        Object.entries(data).forEach(([postId, postDetails]) => {
+                            if (postDetails.user === userTag) {
+                                // Delete this specific matching post from the cloud
+                                database.ref('posts/' + postId).remove();
+                            }
+                        });
+                    }
+                });
                 
-                alert(`${userTag} has been blacklisted inside Firebase cloud sync.`);
+                alert(`💥 Amputation complete. ${userTag} is blacklisted and their entire post history has been wiped.`);
             }
         }
 
