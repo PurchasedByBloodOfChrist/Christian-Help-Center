@@ -175,12 +175,26 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let blacklist = ["User_4421", "User_9902"];
+        // Check if this browser already has a saved User Token from this week
+        let currentSessionUser = localStorage.getItem('help_center_user_token');
+        if (!currentSessionUser) {
+            currentSessionUser = "User_" + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('help_center_user_token', currentSessionUser);
+        }
+
         let isAdmin = false;
+        let activeBlacklist = [];
 
-        // Generate a random, temporary User token for this browser tab session
-        const currentSessionUser = "User_" + Math.floor(1000 + Math.random() * 9000);
+        // Continuous sync loop listening to the cloud Blacklist directory
+        database.ref('blacklist').on('value', (snapshot) => {
+            activeBlacklist = [];
+            const data = snapshot.val();
+            if (data) {
+                activeBlacklist = Object.values(data);
+            }
+        });
 
+        // Continuous sync loop loading board posts
         database.ref('posts').on('value', (snapshot) => {
             const board = document.getElementById("boardPosts");
             const ex1 = document.getElementById("ex1");
@@ -198,7 +212,6 @@
                 });
 
                 postList.forEach(post => {
-                    // Check if the current user is either Admin OR the original author of this specific post
                     const showDeleteButton = isAdmin || (post.user === currentSessionUser);
 
                     const newPostHTML = `
@@ -230,7 +243,7 @@
             
             if (postText === "") return;
 
-            // Admin activation check
+            // Admin password verification
             if (postText.startsWith("/admin ")) {
                 const typedPassword = postText.substring(7).trim();
                 
@@ -238,11 +251,8 @@
                     isAdmin = true;
                     document.getElementById("adminBadge").style.display = "inline-block";
                     
-                    const adminControls = document.querySelectorAll('.admin-controls');
-                    adminControls.forEach(control => control.style.display = 'flex');
-
-                    const userControls = document.querySelectorAll('.user-controls');
-                    userControls.forEach(control => control.style.display = 'flex');
+                    document.querySelectorAll('.admin-controls').forEach(c => c.style.display = 'flex');
+                    document.querySelectorAll('.user-controls').forEach(c => c.style.display = 'flex');
                     
                     alert("Access Granted: Admin Dashboard Loaded.");
                     inputField.value = "";
@@ -254,8 +264,10 @@
                 }
             }
 
-            if (blacklist.includes(currentSessionUser)) {
-                alert("Access Denied: This active user token is currently blacklisted.");
+            // Real-time Cloud Blacklist check
+            if (activeBlacklist.includes(currentSessionUser)) {
+                alert("Access Denied: Your browser device token has been permanently banned from posting by the administrator.");
+                inputField.value = "";
                 return;
             }
             
@@ -280,19 +292,23 @@
             postRef.once('value').then((snapshot) => {
                 const postData = snapshot.val();
                 if (postData) {
-                    postRef.update({
-                        isPinned: !postData.isPinned
-                    });
+                    postRef.update({ isPinned: !postData.isPinned });
                 }
             });
         }
 
         function banUser(userTag, id) {
-            if (userTag !== 'System') {
-                blacklist.push(userTag);
-                alert(`${userTag} has been officially added to the session blacklist.`);
+            if (userTag === 'System') return;
+            
+            if (confirm(`Permanently ban ${userTag} and drop all their posts?`)) {
+                // 1. Commit the user token straight to the cloud blacklist branch
+                database.ref('blacklist').push(userTag);
+                
+                // 2. Erase the offending post
+                database.ref('posts/' + id).remove();
+                
+                alert(`${userTag} has been blacklisted inside Firebase cloud sync.`);
             }
-            database.ref('posts/' + id).remove();
         }
 
         function escapeHTML(str) {
